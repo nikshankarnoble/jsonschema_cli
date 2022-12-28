@@ -24,7 +24,7 @@ Basic Python module for generating an argparse CLI from a JSON-Schema document.
     'required': ['playblast_type'],
 }
 
->>> parser = jsonschema_cli.build_cli(schema)
+>>> parser = jsonschema_cli.create_parser(schema)
 ```
 ```
 >>> parser.print_help()
@@ -39,6 +39,16 @@ options:
   --playblast-type {client,internal}
 ```
 ```
->>> args = parser.parse_args(['--width', '2248.5', '--playblast-type', 'internal'])
+>>> args = parser.parse_args(['--width', '-2248', '--playblast-type', 'internal'])
 >>> jsonschema.validate(args.__dict__, schema)
+ValidationError: -2248 is less than the minimum of 0
+
+Failed validating 'minimum' in schema['properties']['width']:
+    {'default': 1920,
+     'description': 'Width of the output image',
+     'minimum': 0,
+     'type': 'integer'}
+
+On instance['width']:
+    -2248
 ```

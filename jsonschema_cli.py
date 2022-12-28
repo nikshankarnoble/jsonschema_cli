@@ -68,15 +68,13 @@ def bool_arg(arg: str) -> bool:
         raise ValueError(f"Unknown boolean value: {arg}")
 
 
-def build_cli(schema: dict) -> argparse.ArgumentParser:
+def add_schema_args(parser: argparse.ArgumentParser, schema: dict) -> None:
     """
-    Build command line interface based on JSON-Schema document.
+    Adds arguments to a CLI parser, based on a JSON-Schema document.
 
     Args:
+        parser (argparse.ArgumentParser): the parser to add arguments to.
         schema (dict): JSON-Schema document.
-
-    Returns:
-        (argparse.ArgumentParser): Command line interface.
 
     Raises:
         jsonschema.exceptions.SchemaError: if the provided schema is invalid.
@@ -85,10 +83,6 @@ def build_cli(schema: dict) -> argparse.ArgumentParser:
     # Check the provided JSON-Schema is valid.
     validator = jsonschema.validators.validator_for(schema)
     validator.check_schema(schema)
-
-    parser = argparse.ArgumentParser(
-        description=schema.get("description", None),
-    )
 
     for key, value in schema["properties"].items():
         # Get property schema information.
@@ -134,4 +128,24 @@ def build_cli(schema: dict) -> argparse.ArgumentParser:
         else:
             raise ValueError(f"Unknown type: {value['type']}")
 
+
+def create_parser(schema: dict) -> argparse.ArgumentParser:
+    """
+    Creates a CLI parser, based on a JSON-Schema document.
+
+    Args:
+        schema (dict): JSON-Schema document.
+
+    Returns:
+        (argparse.ArgumentParser) the created parser.
+
+    Raises:
+        jsonschema.exceptions.SchemaError: if the provided schema is invalid.
+        MultipleTypeOptionsError: if a property accepts multiple (non-null) types.
+    """
+    parser = argparse.ArgumentParser(
+        prog=schema.get("title", None),
+        description=schema.get("description", ""),
+    )
+    add_schema_args(parser, schema)
     return parser
